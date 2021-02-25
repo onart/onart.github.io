@@ -1,0 +1,92 @@
+@import url(http://fonts.googleapis.com/earlyaccess/jejugothic.css);
+@import url(numsil.ttf);
+html {
+    background-color:rgb(223, 247, 255);
+}
+
+body {
+    font-family: "Jeju Gothic";
+    display: grid;
+    grid-template-areas:    "header header"
+                            "left main"
+                            ". main"
+                            "footer footer"
+                            ;
+    grid-template-rows: 100px auto auto 100px;
+    grid-template-columns: 20% 80%;
+}
+
+header {
+    /*background:linear-gradient(to bottom, cornflowerblue,rgb(158, 231, 255));*/
+    grid-area: header;
+    background-color:cornflowerblue;
+    color: white;
+    padding: 1% 1%;
+    width:100%;
+    display:flex;
+    justify-content: space-between;
+    justify-items: center;
+    align-items:center;
+}
+nav {
+    align-content:flex-end;
+    margin-right:5%;
+}
+
+left {
+    min-width: 150px;
+    max-width: 250px;
+    grid-area: left;
+    background-color: cornflowerblue;
+    padding: 10px;
+}
+
+left, main, footer{
+    margin-top: 10px;
+}
+
+main {
+    min-width: 300px;
+    padding: 10px;
+    grid-area: main;
+    border-radius: 5%;
+    margin-left:10px;
+    background-color: white;
+}
+
+footer{
+    padding: 10px;
+    text-align: center;
+    grid-area: footer;
+    background-color: cornflowerblue;
+}
+
+footer a{
+    text-decoration: none;
+    color:white;
+}
+
+#top{
+    display: inline-block;
+    text-align: center;
+    width: auto;
+    font-family: ONL넘실1;
+}
+h1 a {
+    color:white;
+    text-decoration:none;
+}
+a.hmenu{
+    transition: background-color .5s;
+    color:white;
+    background-color: cornflowerblue;
+    /*background:linear-gradient(to bottom, cornflowerblue,rgb(158, 231, 255));*/
+    padding: 20px 10px;
+    margin: auto auto;
+    border-radius:5%;
+    text-decoration: none;
+    text-align: center;
+}
+a.hmenu:hover{
+    background-color:rgba(158, 231, 255, 0.5);
+}
