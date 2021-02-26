@@ -34,6 +34,8 @@ nav {
 }
 
 left {
+    color:white;
+    overflow-y: scroll;
     min-width: 150px;
     max-width: 250px;
     grid-area: left;
