@@ -1,5 +1,9 @@
+@font-face{
+    font-family: 'numsil';
+    src: url('./numsil.ttf') format('truetype');
+}
+
 @import url(https://fonts.googleapis.com/earlyaccess/jejugothic.css);
-@import url(./numsil.ttf);
 html {
     background-color:rgb(223, 247, 255);
 }
@@ -71,7 +75,7 @@ a.getsth{
     display: inline-block;
     text-align: center;
     width: auto;
-    font-family: ONL넘실1;
+    font-family: numsil;
 }
 h1 a {
     color:white;
