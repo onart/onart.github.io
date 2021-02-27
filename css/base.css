@@ -3,13 +3,23 @@
     src: url('./numsil.ttf') format('truetype');
 }
 
-@import url(https://fonts.googleapis.com/earlyaccess/jejugothic.css);
+@font-face {
+    font-family: 'Jeju Gothic';
+    font-style: normal;
+    font-weight: 400;
+    src: url(//fonts.gstatic.com/ea/jejugothic/v3/JejuGothic-Regular.eot);
+    src: url(//fonts.gstatic.com/ea/jejugothic/v3/JejuGothic-Regular.eot?#iefix) format('embedded-opentype'),
+         url(//fonts.gstatic.com/ea/jejugothic/v3/JejuGothic-Regular.woff2) format('woff2'),
+         url(//fonts.gstatic.com/ea/jejugothic/v3/JejuGothic-Regular.woff) format('woff'),
+         url(//fonts.gstatic.com/ea/jejugothic/v3/JejuGothic-Regular.ttf) format('truetype');
+  }
+
 html {
     background-color:rgb(223, 247, 255);
 }
 
 body {
-    font-family: "Jeju Gothic";
+    font-family: 'Jeju Gothic';
     display: grid;
     grid-template-areas:    "header header"
                             "left main"
