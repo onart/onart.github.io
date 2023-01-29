@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>찜질방</title>
+        <link href="css/base.css" rel="stylesheet">
+    </head>
+    <body>
+        <img src="">
+        <header>
+            <h1 id="top"><a href="#" onclick="changeView('')">42트</a></h1>
+            <nav>
+                <a href="#" class="hmenu" onclick="changeView('emspv.html')">GLSL -> SPIR-V 컴파일러</a>
+                <a href="" class="hmenu">...</a>
+            </nav>
+        </header>
+        <left>
+            [A]
+            <br>
+            B
+            <hr>
+            [C]
+            <br>
+            D
+        </left>
+        <main>
+            <div class="title">
+                <b>[INDEX]</b>
+            </div>
+            <hr>
+            <div class="content">
+                <embed id="innerscreen" src="#" style="visibility: hidden; height: 0;"><br>
+                우측 상단의 기능을 참고하세요.
+                <ul>
+                    <li>GLSL -> SPIR-V 컴파일러</li>
+                    <li>(예정)ktx2 BasisU 텍스처 인코더</li>
+                </ul>
+                <br>
+            </div>
+            <hr>
+            <div class="after">
+                after
+            </div>
+        </main>
+        <footer>
+            <a href="css/numsil.ttf" class="getsth">좌측 상단의 폰트(?)</a>
+        </footer>
+        <script>
+            function changeView(link){
+                if(link.length === 0){
+                    document.getElementById("innerscreen").setAttribute("src",link);
+                    document.getElementById("innerscreen").setAttribute("style","visibility: hidden; height: 0;");
+                }
+                else{
+                    document.getElementById("innerscreen").setAttribute("src",link);
+                    document.getElementById("innerscreen").setAttribute("style","width: 100%;height:1000px;");
+                }
+            }
+        </script>
+    </body>
+</html>
