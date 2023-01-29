@@ -2,33 +2,54 @@
     <h2>
         [GLSLC]아래에 GLSL 코드를 입력하고 버튼 중 알맞는 것을 눌러 컴파일하여, 그 결과를 C/C++ 배열로 출력합니다.<br>
     </h2>
-    <h4>
-        [오픈소스 라이센스]<br>
-        <a href = "https://github.com/google/shaderc">Google libshaderc</a> | <a href = "resources/LICENSE_APACHE20.txt">라이센스 보기(Apache 2.0)</a><br>
-        <a href = "https://emscripten.org/index.html">emscripten</a> | <a href = "resources/LICENSE_EMSCRIPTEN.txt">라이센스 보기</a>
-    </h4>
-    <textarea id="shadercode" style="width: 60%;height: 400px;"></textarea>
+    <h3>
+        spv 파일 다운로드 버튼은 입력창 옆에 있습니다.
+    </h3>
+    <textarea id="shadercode" style="width: 60%;height: 300px;"></textarea>
+    <a id="downloadShader">바이너리 (리틀엔디안) 다운로드</a>
     <hr>
     <input type="button" onclick="compilethisone(SHADER_TYPE_VERTEX);" value="COMPILE VERTEX SHADER">
     <input type="button" onclick="compilethisone(SHADER_TYPE_FRAGMENT);" value="COMPILE FRAGMENT SHADER">
     <input type="button" onclick="compilethisone(SHADER_TYPE_GEOM);" value="COMPILE GEOMETRY SHADER">
     <input type="button" onclick="compilethisone(SHADER_TYPE_TESS_CTRL);" value="COMPILE TESSELATION CONTROL SHADER">
     <input type="button" onclick="compilethisone(SHADER_TYPE_TESS_EVAL);" value=" COMPILE TESSELATION EVALUATION SHADER">
-    
-    <script async src=emspv.js></script>
+    <h4>
+        [오픈소스 라이센스]<br>
+        <a href = "https://github.com/google/shaderc">Google libshaderc</a> | <a href = "resources/LICENSE_APACHE20.txt">라이센스 보기(Apache 2.0)</a><br>
+        <a href = "https://emscripten.org/index.html">emscripten</a> | <a href = "resources/LICENSE_EMSCRIPTEN.txt">라이센스 보기</a>
+    </h4>
     <script>
         const shadercode = document.getElementById('shadercode')
+        const DOWNLOAD_BUTTON = document.getElementById('downloadShader');
+        const STD_OUT = document.getElementById('output');
         const SHADER_TYPE_VERTEX = 0;
         const SHADER_TYPE_FRAGMENT = 1;
         const SHADER_TYPE_GEOM = 3;
         const SHADER_TYPE_TESS_CTRL = 4;
         const SHADER_TYPE_TESS_EVAL = 5;
         function compilethisone(shaderType){
-            document.getElementById("output").value = "";
+            STD_OUT.value = "";
             console.log(`compile("${shadercode.value}", ${lengthBytesUTF8(shadercode.value)}, ${shaderType})`);
+            DOWNLOAD_BUTTON.removeAttribute('download')
+            DOWNLOAD_BUTTON.removeAttribute('href')
             Module.ccall('compile',null,['string','number','number'],[shadercode.value, lengthBytesUTF8(shadercode.value), shaderType])
-            if(document.getElementById("output").value.length === 0) {
+            var result = STD_OUT.value;
+            if(result.length === 0) {
                 alert("Unknown memory error. Please refresh the browser(F5)");
+            }
+            else if (result.slice(0,5) === "const"){
+                var u32count = parseInt(result.split('[')[1].split(']')[0]);
+                let uints = result.split('{')[1].split('}')[0].split(',');
+                let buffer = new ArrayBuffer(u32count * 4);
+                let iter = 0;
+                let dv = new DataView(buffer)
+                uints.forEach(element => {
+                    dv.setUint32(iter, parseInt(element), true);
+                    iter+=4;
+                });
+                const blob = new Blob([buffer], { type: 'application/octet-stream' });
+                DOWNLOAD_BUTTON.setAttribute('download','a.spv');
+                DOWNLOAD_BUTTON.setAttribute('href', window.URL.createObjectURL(blob));
             }
         }
     </script> <script async src=js/emspv.js></script></body></html>
