@@ -62,6 +62,16 @@
                 console.defaultError.apply(console, arguments);
                 console.errorCallback(arguments[0]);
             }
+
+	document.addEventListener('dragover', function (event) {
+                // Prevent the default dragover behavior
+                 event.preventDefault();
+            });
+
+            document.addEventListener('drop', function (event) {
+            // Prevent the default drop behavior
+                event.preventDefault();
+            });
         </script>
 
         <script src="./js/three.js"></script>
