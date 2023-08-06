@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>3toy</title>
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+            #cv {
+                width: 100%;
+                height: 100%;
+            }
+		</style>
+	</head>
+	<body>
+        <table style="width:100%">
+            <tr>
+                <td>
+                    <canvas id="cv">
+                    </canvas>
+                </td>
+                <td style="width:50%">
+                    <textarea 
+                    onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}"
+                    id="shadercode" style="width: 90%;height: 300px;tab-size:4;" ondrop="textDrop(event);" ondragover="(event) => event.preventDefault();"></textarea>
+                    <br>
+                    <button id="p1">pass 1</button>
+                    <button id="p2">pass 2</button>
+                    <button id="p3">pass 3</button>
+                    <button id="p4">pass 4</button>
+                </td>
+            </tr>
+        </table>
+        <hr>
+        <table style="width:100%">
+            <tr>
+                <td style="width:50%">
+                    <textarea readonly id="logs" style="background-color: black;color: yellow; overflow:scroll;width: 100%;height: 300px; resize:none;" ondragover="(event) => event.preventDefault();"></textarea>
+        <br><button onclick="clearLogs();">clear logs</button>
+                </td>
+                <td style="width:50%">
+                    &emsp; background <input ondrop="loadImage(event, 0);" ondragover="(event) => event.preventDefault();""></input>
+                    <img id="tex0" src="" style="width:64px;height:64px;">
+                    <br>
+                    &emsp; texture1 <input ondrop="loadImage(event, 1);" ondragover="(event) => event.preventDefault();""></input>
+                    <img id="tex1" src="" style="width:64px;height:64px;">
+                    <br>
+                    &emsp; texture2 <input ondrop="loadImage(event, 2);" ondragover="(event) => event.preventDefault();""></input>
+                    <img id="tex2" src="" style="width:64px;height:64px;">
+                    <br>
+                    &emsp; texture3 <input ondrop="loadImage(event, 3);" ondragover="(event) => event.preventDefault();""></input>
+                    <img id="tex3" src="" style="width:64px;height:64px;">
+                    <br>
+                </td>
+            </tr>
+        </table>
+        
+        <script>
+            <!--hook log-->
+            console.defaultError=console.error.bind(console);
+            console.error = function(){
+                console.defaultError.apply(console, arguments);
+                console.errorCallback(arguments[0]);
+            }
+        </script>
+
+        <script src="./js/three.js"></script>
+        <script src="./js/three_addon.js"></script>
+		<script>
+            const postprocessors = [];
+            const textures = [];
+            console.errorCallback = (msg)=>{
+                var ta = document.getElementById("logs");
+                ta.value += msg + "\n\n=======================================================\n\n";
+                ta.scrollTop = ta.scrollHeight;
+            };
+
+            function clearLogs(){
+                var ta = document.getElementById("logs");
+                ta.value="";
+            }
+
+            function resizeIfNeeded() {
+                if(scene.background.image){
+                    if(canvas.width != scene.background.image.naturalWidth){
+                        canvas.width = scene.background.image.naturalWidth;   
+                    }
+                    if(canvas.height != scene.background.image.naturalHeight){
+                        canvas.height = scene.background.image.naturalHeight;
+                    }
+                }
+                const needResize = canvas.clientWidth !== canvas.width || canvas.clientHeight !== canvas.height;
+                if(needResize){
+                    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+                    composer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+                }
+                return needResize;
+            }
+
+            function animate() {
+	            requestAnimationFrame( animate ); // vsync
+                t += 0.01;
+                if(resizeIfNeeded()){
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                }
+	            composer.render();
+            }
+
+            function textDrop(event){
+                //event.preventDefault();
+                if(event.dataTransfer.items) {
+                    [...event.dataTransfer.items].forEach((item, i) =>{
+                        if(item.kind === 'file'){
+                            const file = item.getAsFile();
+                            if (file.size > 65535) {
+                                alert("File too big. You can still try to copy contents");
+                                return;
+                            }
+                            var fr = new FileReader();
+                            fr.addEventListener('load', (event) => {
+                                shadercode.value = new TextDecoder("utf-8").decode(event.target.result);
+                            });
+                            fr.readAsArrayBuffer(file);
+                            return;
+                        }
+                    });
+                }
+            }
+
+            function loadImage(event, imageId){
+                if(event.dataTransfer.items){
+                    [...event.dataTransfer.items].forEach((item, i) =>{
+                        if(item.kind === 'file'){
+                            const file = item.getAsFile();
+                            const arr = file.name.split('.');
+                            ext = arr[arr.length-1];
+                            var fr = new FileReader();
+                            fr.addEventListener('load', (event) => {
+                                const imgtag = document.getElementById(`tex${imageId}`);
+                                imgtag.src=`data:image/${ext};base64,`+
+                                btoa(event.target.result);
+                                const newTexture = new THREE.TextureLoader().load(imgtag.src);
+                                if(imageId == 0){
+                                    scene.background = newTexture;
+                                }
+                                else{
+                                    textures[imageId-1]= newTexture;
+                                }
+                            });
+                            fr.readAsBinaryString(file);
+                            return;
+                        }
+                    });
+                }
+            }
+
+            let thisEpoch = Date.now();
+            let selected = 0;
+
+            function resetEpoch(){
+                thisEpoch=Date.now();
+            }
+
+            const textArea0 = document.getElementById(`shadercode`);
+
+            for(let i=1;i<=4;i++){
+                document.getElementById(`p${i}`).onclick = (event)=>{
+                    postprocessors[selected].fragmentShader = textArea0.value;
+                    textArea0.value=postprocessors[i-1].fragmentShader;
+                    composer.removePass(composer.passes[selected + 1]);
+                    composer.insertPass(new ShaderPass(postprocessors[selected]), selected + 1);
+                    selected = i-1;
+                    try{
+                        composer.reset();
+                    }
+                    catch(error){
+                        console.log(error);
+                    }
+                }
+            }
+
+			const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1,1,1,-1,1,10);
+
+
+            const canvas = document.querySelector('#cv');
+            const renderer = new THREE.WebGLRenderer({canvas})
+            const composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera);
+            postprocessors.push(makeDefaultShader());
+            postprocessors.push(makeDefaultShader());
+            postprocessors.push(makeDefaultShader());
+            postprocessors.push(makeDefaultShader());
+            postprocessors[0].uniforms['opacity'].value=1.0;
+            //postprocessors[0].uniforms['color2'].value=0.7;
+            composer.addPass(renderPass);
+            composer.addPass(new ShaderPass(postprocessors[0]));
+            composer.addPass(new ShaderPass(postprocessors[1]));
+            composer.addPass(new ShaderPass(postprocessors[2]));
+            composer.addPass(new ShaderPass(postprocessors[3]));
+            //composer.addPass(new OutputPass());
+            document.getElementById(`shadercode`).innerHTML=postprocessors[0].fragmentShader;
+            camera.position.set(0, 0, 1.5);
+            scene.background = new THREE.TextureLoader().load("sample.png");
+            //scene.add( img );
+            let t=0;
+            //camera.lookAt(0, 0, 0);
+            animate();
+		</script>
+	</body>
+</html>
