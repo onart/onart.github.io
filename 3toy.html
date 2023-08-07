@@ -78,7 +78,7 @@
         <script src="./js/three_addon.js"></script>
 		<script>
             const postprocessors = [];
-            const textures = [];
+            const textures = [undefined, undefined, undefined];
             console.errorCallback = (msg)=>{
                 var ta = document.getElementById("logs");
                 ta.value += msg + "\n\n=======================================================\n\n";
@@ -180,6 +180,9 @@
                     textArea0.value=postprocessors[i-1].fragmentShader;
                     composer.removePass(composer.passes[selected + 1]);
                     composer.insertPass(new ShaderPass(postprocessors[selected]), selected + 1);
+                    for (let i=0;i<3;i++){
+                        if(textures[i]) composer.passes[selected + 1].uniforms[`texture${i+1}`] = {value: textures[i], type: 't'};
+                    }
                     selected = i-1;
                     try{
                         composer.reset();
