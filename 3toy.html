@@ -28,6 +28,8 @@
                     <button id="p2">pass 2</button>
                     <button id="p3">pass 3</button>
                     <button id="p4">pass 4</button>
+                    <br>
+                    <button onclick="exportQURL()">export</button>
                 </td>
             </tr>
         </table>
@@ -54,7 +56,7 @@
                 </td>
             </tr>
         </table>
-        
+        <div id="expurl" style="overflow-wrap: break-word;"></div>
         <script>
             <!--hook log-->
             console.defaultError=console.error.bind(console);
@@ -76,6 +78,7 @@
 
         <script src="./js/three.js"></script>
         <script src="./js/three_addon.js"></script>
+        <script src="./js/lz-string.js"></script>
 		<script>
             const postprocessors = [];
             const textures = [undefined, undefined, undefined];
@@ -165,6 +168,36 @@
                 }
             }
 
+            function makeQURL(){
+                let base = window.location.href.split('?')[0];
+                let qr = "";
+                let dfault = makeDefaultShader().fragmentShader;
+                for(let i=1;i<=4;i++){
+                    if(dfault != postprocessors[i-1].fragmentShader){
+                        if(qr){
+                            qr += '&';
+                        }
+                        else{
+                            qr += '?';
+                        }
+                        qr += `s${i}=${LZString.compressToBase64(postprocessors[i-1].fragmentShader)}`;
+                    }
+                }
+                return base + qr;
+            }
+
+            function exportQURL(){
+                document.getElementById('expurl').innerHTML=makeQURL();
+            }
+
+            var params = {};  
+    
+            window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, 
+                function(str, key, value) { 
+                    params[key] = value; 
+                }
+            );
+
             let thisEpoch = Date.now();
             let selected = 0;
 
@@ -174,6 +207,20 @@
 
             const textArea0 = document.getElementById(`shadercode`);
 
+			const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1,1,1,-1,1,10);
+
+
+            const canvas = document.querySelector('#cv');
+            const renderer = new THREE.WebGLRenderer({canvas})
+            const composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera);
+            
+            postprocessors.push(makeDefaultShader());
+            postprocessors.push(makeDefaultShader());
+            postprocessors.push(makeDefaultShader());
+            postprocessors.push(makeDefaultShader());
+            
             for(let i=1;i<=4;i++){
                 document.getElementById(`p${i}`).onclick = (event)=>{
                     postprocessors[selected].fragmentShader = textArea0.value;
@@ -191,22 +238,22 @@
                         console.log(error);
                     }
                 }
+
+                if(params[`s${i}`]){
+                    const fs = LZString.decompressFromBase64(params['s1']);
+                    postprocessors[i-1].fragmentShader = fs;
+                    if(i-1==selected){
+                        textArea0.value = fs;
+                    }
+                }
+                try{
+                    composer.reset();
+                }
+                catch(error){
+                    console.log(error);
+                }
             }
 
-			const scene = new THREE.Scene();
-            const camera = new THREE.OrthographicCamera(-1,1,1,-1,1,10);
-
-
-            const canvas = document.querySelector('#cv');
-            const renderer = new THREE.WebGLRenderer({canvas})
-            const composer = new EffectComposer(renderer);
-            const renderPass = new RenderPass(scene, camera);
-            postprocessors.push(makeDefaultShader());
-            postprocessors.push(makeDefaultShader());
-            postprocessors.push(makeDefaultShader());
-            postprocessors.push(makeDefaultShader());
-            postprocessors[0].uniforms['opacity'].value=1.0;
-            //postprocessors[0].uniforms['color2'].value=0.7;
             composer.addPass(renderPass);
             composer.addPass(new ShaderPass(postprocessors[0]));
             composer.addPass(new ShaderPass(postprocessors[1]));
