@@ -240,7 +240,7 @@
                 }
 
                 if(params[`s${i}`]){
-                    const fs = LZString.decompressFromBase64(params['s1']);
+                    const fs = LZString.decompressFromBase64(params[`s${i}`]);
                     postprocessors[i-1].fragmentShader = fs;
                     if(i-1==selected){
                         textArea0.value = fs;
