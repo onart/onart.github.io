@@ -35,6 +35,10 @@
                 </td>
             </tr>
         </table>
+	<input id="xgauge" type="number" min="-1000" max="1000" step="0.1" value="1.0"> </input>
+        <input id="ygauge" type="number" min="-1000" max="1000" step="0.1" value="1.0"> </input>
+        <input id="zgauge" type="number" min="-1000" max="1000" step="0.1" value="1.0"> </input>
+        <input id="wgauge" type="number" min="-1000" max="1000" step="0.1" value="1.0"> </input>
         <hr>
         <script>
             <!--hook log-->
@@ -53,12 +57,27 @@
             // Prevent the default drop behavior
                 event.preventDefault();
             });
+	    const xSlider = document.getElementById('xgauge');
+            const ySlider = document.getElementById('ygauge');
+            const zSlider = document.getElementById('zgauge');
+            const wSlider = document.getElementById('wgauge');
+            function updates(event) {
+                composer.passes[1].uniforms.extra.value.x = xSlider.value;
+                composer.passes[1].uniforms.extra.value.y = ySlider.value;
+                composer.passes[1].uniforms.extra.value.z = zSlider.value;
+                composer.passes[1].uniforms.extra.value.w = wSlider.value;
+            }
+            xSlider.addEventListener('input', updates);
+            ySlider.addEventListener('input', updates);
+            zSlider.addEventListener('input', updates);
+            wSlider.addEventListener('input', updates);
         </script>
 
         <script src="./js/three.js"></script>
         <script src="./js/three_addon.js"></script>
         <script src="./js/lz-string.js"></script>
 		<script>
+	let uptex = true;
             const postprocessors = [];
             const textures = [undefined, undefined, undefined];
             console.errorCallback = (msg)=>{
@@ -75,7 +94,11 @@
             function resizeIfNeeded() {
                 if(scene.background.image){
                     if(canvas.width != scene.background.image.naturalWidth){
-                        canvas.width = scene.background.image.naturalWidth;   
+                        canvas.width = scene.background.image.naturalWidth;  
+			if(uptex){
+                            ySlider.value = scene.background.image.width;
+                            uptex=false;
+                        }
                     }
                     if(canvas.height != scene.background.image.naturalHeight){
                         canvas.height = scene.background.image.naturalHeight;
@@ -85,6 +108,8 @@
                 if(needResize){
                     renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
                     composer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+		    zSlider.value = canvas.clientWidth;
+                    wSlider.value = 2.6;
                 }
                 return needResize;
             }
@@ -135,6 +160,7 @@
                                 const newTexture = new THREE.TextureLoader().load(imgtag.src);
                                 if(imageId == 0){
                                     scene.background = newTexture;
+					uptex = true;
                                 }
                                 else{
                                     textures[imageId-1]= newTexture;
