@@ -664,8 +664,8 @@ class RenderPass extends Pass {
 		uniforms: {
 	
 			'tDiffuse': { value: null },
-			'opacity': { value: 1.0 }
-	
+			'opacity': { value: 1.0 },
+			'extra': { value: new THREE.Vector4()}
 		},
 	
 		vertexShader: /* glsl */`
